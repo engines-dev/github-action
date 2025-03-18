@@ -67,10 +67,5 @@
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "*"
-  },
-  "prettier": {
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "all"
   }
 }
