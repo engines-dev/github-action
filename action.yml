@@ -7,14 +7,27 @@ branding:
   color: red
 
 inputs:
-  milliseconds:
-    description: Input that defines the number of milliseconds to wait
+  pr_sha:
+    description: Commit hash
+    required: false
+    default: ${{ github.event.pull_request.head.sha }}
+
+  file_path:
+    description: Path to any file
     required: true
-    default: '200'
+    default: 'README.md'
+
+  test_run_cmd:
+    description: Command to run tests
+    required: true
+    default: 'npm run ci-test'
 
 outputs:
-  time:
-    description: Output is the current time
+  first_line:
+    description: First line to the specified file
+
+  pr_updated:
+    description: Whether the PR was successfully updated
 
 runs:
   using: node20

@@ -1,0 +1,39 @@
+name: Snake eating itself
+
+on: pull_request
+
+jobs:
+  feast:
+    name: Feasting on itself
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      # - name: Setup Node.js
+      #   id: setup-node
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version-file: .node-version
+      #     cache: npm
+
+      - name: Install Dependencies
+        id: npm-ci
+        run: npm ci
+
+      - name: Test Local Action
+        id: test-action
+        uses: ./
+        with:
+          pr_sha: ${{ github.event.pull_request.head.sha }}
+          file_path: 'README.md'
+          test_run_cmd: 'npm run ci-test'
+
+      - uses: gr2m/create-or-update-pull-request-action@v1
+        with:
+          commit-message:
+            'Updated ${{ steps.test-action.outputs.file_path }} with `${{
+            steps.test-action.outputs.edit }}`'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
