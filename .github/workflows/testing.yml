@@ -2,10 +2,10 @@ name: Snake eating itself
 
 on: pull_request
 
-# permissions:
-#   contents: read
-#   packages: read
-#   pull-requests: write
+permissions:
+  contents: write
+  packages: read
+  pull-requests: write
 
 jobs:
   feast:
