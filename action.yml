@@ -32,6 +32,12 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .node-version
+        cache: npm
+
     - name: Process Pull Request
       uses: ./dist/index.js
       with:
@@ -47,4 +53,4 @@ runs:
           'Updated ${{ steps.test-action.outputs.file_path }} with `${{
           steps.test-action.outputs.edit }}`'
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}

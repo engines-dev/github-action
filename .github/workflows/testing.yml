@@ -1,0 +1,29 @@
+name: Snake eating itself
+
+on: pull_request
+
+permissions:
+  contents: read
+  packages: read
+  pull-requests: write
+
+jobs:
+  feast:
+    name: Feasting on itself
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        id: npm-ci
+        run: npm ci
+
+      - name: Test Local Action
+        id: test-action
+        uses: ./
+        with:
+          pr_sha: ${{ github.event.pull_request.head.sha }}
+          file_path: 'README.md'
+          test_run_cmd: 'npm run ci-test'
