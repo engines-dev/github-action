@@ -1,5 +1,7 @@
+import { appendFile } from 'node:fs/promises';
+import { getExecOutput } from '@actions/exec';
 import * as core from '@actions/core';
-import { wait } from './wait.js';
+import { readFirstLine } from './util.js';
 
 /**
  * The main function for the action.
@@ -8,18 +10,42 @@ import { wait } from './wait.js';
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds');
+    const filePath = core.getInput('file_path');
+    core.info(`Reading file at ${filePath} at ${core.getInput('pr_sha')}...`);
+    const firstLine = await readFirstLine(filePath);
+    core.info(`First line of file: ${firstLine}`);
+    core.setOutput('file_path', filePath);
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`);
+    const testRunCmd = core.getInput('test_run_cmd');
+    core.info('Now, we verify that the tests currently run and pass');
+    core.info(`Executing command: ${testRunCmd}`);
+    try {
+      const res = await getExecOutput(testRunCmd);
+      core.info(`Test run output: ${res.stdout}`);
+      core.info(`Test run error output: ${res.stderr}`);
+    } catch (error) {
+      // swallow error for now
+      if (error instanceof Error) {
+        core.warning(`Tests failed to run: ${error.message}`);
+      }
+    }
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString());
-    await wait(parseInt(ms, 10));
-    core.debug(new Date().toTimeString());
+    core.info('We will now make an edit to the code');
+    const edit = `This edit was made on ${new Date().toISOString()}.`;
+    await appendFile(filePath, `\n${edit}`);
+    core.setOutput('edit', edit);
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString());
+    core.info('We will now verify the tests still pass after the edit');
+    try {
+      const res = await getExecOutput(testRunCmd);
+      core.info(`Test run output: ${res.stdout}`);
+      core.info(`Test run error output: ${res.stderr}`);
+    } catch (error) {
+      // swallow error for now
+      if (error instanceof Error) {
+        core.warning(`Tests failed to run: ${error.message}`);
+      }
+    }
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message);
