@@ -30,27 +30,5 @@ outputs:
     description: First line to the specified file
 
 runs:
-  using: 'composite'
-  steps:
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: .node-version
-        cache: npm
-
-    - name: Process Pull Request
-      uses: ./dist/index.js
-      with:
-        pr_sha: ${{ github.event.pull_request.head.sha }}
-        file_path: $${{ inputs.file_path }}
-        test_run_cmd: $${{ inputs.test_run_cmd }}
-
-    - name: Create or Update Pull Request
-      uses: gr2m/create-or-update-pull-request-action@v1
-      with:
-        branch: ${{ github.event.pull_request.head.ref }}
-        commit-message:
-          'Updated ${{ steps.test-action.outputs.file_path }} with `${{
-          steps.test-action.outputs.edit }}`'
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+  using: node20
+  main: dist/index.js
